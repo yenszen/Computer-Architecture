@@ -2,12 +2,28 @@
 
 import sys
 
+# starting numbers with "0b" tells the computer the numbers after "0b" are in binary format in python
+# "0x" for hex
+HLT = 0b00000001
+LDI = 0b10000010
+PRN = 0b01000111
+
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.reg = [0] * 8
+        self.ram = [0] * 256
+        self.reg[7] = 0xF4
+        self.pc = 0
+        self.halted = False
+
+    def ram_read(self, address):
+        return self.ram[address]
+
+    def ram_write(self, address, val):
+        self.ram[address] = val 
 
     def load(self):
         """Load a program into memory."""
@@ -62,4 +78,21 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        while not self.halted:
+            instruction_to_execute = self.ram_read(self.pc)
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
+            self.execute_instruction(instruction_to_execute, operand_a, operand_b)
+
+    def execute_instruction(self, instruction, operand_a, operand_b):
+        if instruction == HLT:
+            # do halt stuff here
+            self.halted = True
+            self.pc += 1
+        elif instruction == LDI:
+            # do LDI stuff
+            self.reg[operand_a] = operand_b
+            self.pc += 3
+        elif instruction == PRN:
+            print(self.reg[operand_a])
+            self.pc += 2

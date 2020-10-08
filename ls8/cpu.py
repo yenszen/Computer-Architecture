@@ -7,6 +7,10 @@ import sys
 HLT = 0b00000001
 LDI = 0b10000010
 PRN = 0b01000111
+MULT = 0b10100010
+PUSH = 0b01000101
+POP = 0b01000110
+SP = 7
 
 class CPU:
     """Main CPU class."""
@@ -19,9 +23,11 @@ class CPU:
         self.pc = 0
         self.halted = False
 
+    # returns value in ram stored in address
     def ram_read(self, address):
         return self.ram[address]
 
+    # stores value in specified address in ram
     def ram_write(self, address, val):
         self.ram[address] = val 
 
@@ -108,3 +114,23 @@ class CPU:
         elif instruction == PRN:
             print(self.reg[operand_a])
             self.pc += 2
+        elif instruction == MULT:
+            self.reg[operand_a] *= self.reg[operand_b]
+            self.pc += 3
+        elif instruction == PUSH:
+            # decrement the stack pointer
+            self.reg[SP] -= 1
+            # write the value stored in the register onto the stack
+            valueFromRegister = self.reg[operand_a]
+            self.ram_write(valueFromRegister, self.reg[SP])
+            self.pc += 2
+        elif instruction == POP:
+            # save the value on top of the stack onto the register given
+            topmostValue = self.ram_read(self.reg[SP])
+            self.reg[operand_a] = topmostValue
+            # increment the stack pointer
+            self.reg[SP] += 1
+            self.pc += 2
+        else:
+            print("Idk this instruction, Exiting")
+            sys.exit(1)
